@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Childbirth </title>
+	</head>
+	<h3 style="color:Tomato;"> Average childbirth rate in different regions per day </h3>
+	<style>
+		.bar {
+		fill: green;
+		}
+	</style>
+	<body>
+		<!-- load the library for D3.js -->
+		<script src="//d3js.org/d3.v4.min.js"></script>
+		<script>
+				//defining SVG width and height
+				var margin = {top: 10, right: 20, bottom: 140, left:40 };
+				var height = 500 - margin.top - margin.bottom,
+					width = 960 - margin.right - margin.left;
+				//creating scale range
+				var xScale = d3.scaleBand()
+								.range([0, width])
+								.padding(0.2);
+				var yScale = d3.scaleLinear()
+								.range([height, 0]);
+				//appending SVG elements
+				var svgGraph = d3.select("body")
+								.append("svg")
+								.attr("width", width + margin.left + margin.right)
+								.attr("height", height + margin.top + margin.bottom)
+				//appending a group and apply transformation on svgGraph
+				var svg = svgGraph.append("g")
+								.attr("transform","translate(" + margin.left + "," + margin.top + ")");
+				//loading data
+				d3.csv("birth.csv", function(error, data)
+				{	if (error) throw error;
+					data.forEach(function(d)
+					{
+						d.amount = +d.amount;
+					});
+					// providing domain values to the x and y scales.
+					xScale.domain(data.map(function(d) { return d.region; }));
+					yScale.domain([0, d3.max(data, function(d) { return d.amount; })]);
+					
+					
+					//appending rectangle for bar chart.
+					svg.selectAll(".bar")
+								.data(data)
+								.enter().append("rect")
+								.attr("class", "bar")
+								.attr("x", function(d) { return xScale(d.region); })
+								.attr("width", xScale.bandwidth())
+								.attr("y", function(d) { return yScale(d.amount); })
+								.attr("height", function(d) { return height - yScale(d.amount); }); 
+
+								
+					// adding x axis to SVG
+					svg.append("g")
+							.attr("transform", "translate(0," + height + ")")
+							.call(d3.axisBottom(xScale))
+							.selectAll("text")
+							.style("text-anchor","end")
+							.attr("dx", "-.8em")
+							.attr("dy","-.55em")
+							.attr("transform","rotate(-90)");  
+							
+					// adding y axis to SVG
+					svg.append("g")
+							.call(d3.axisLeft(yScale));
+							
+					// adding text in x-axis bottom		
+					svg.append("text")
+							.attr("text-anchor", "middle")
+							.style("font-size", "10px")
+							.style("fill", "blue")
+							.attr("transform", "translate("+ (width/2) + "," + (height + (margin.bottom - margin.top)) + ")")
+							.text("Regions")
+							.style("font-family", "Arial");
+							
+					// adding text in y axis left	
+					svg.append("text")
+							.attr("text-anchor", "middle")
+							.style("font-size", "10px")
+							.style("fill", "blue")
+							.text("Average childbirth")
+							.style("font-family", "Arial")
+							.attr("dx", "-15.0em")
+							.attr("dy","-3.1em")
+							.attr("y", 6)
+							.attr("transform","rotate(-90)"); 							
+
+				});
+								
+		</script>			
+	</body>		
+</html>
